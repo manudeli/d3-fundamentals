@@ -1,53 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <style></style>
+    <meta charset="utf-8" />
   </head>
   <body>
-    <!-- 막대 차트 만들기 -->
-    <!-- 1. 막대 만들기 -->
-    <!-- 2. 데이터 넣기 -->
-    <!-- 3. 데이터 값 비율에 맞게 막대 너비 조절 -->
-    <!-- 4. 라벨 추가하기 -->
-    <!-- 5. 축 추가하기 -->
-    <!-- 6. 스타일 추가하기 -->
-    <svg width="600px" height="500px">
-      <g transform="translate(150,30) scale(0.000022707158829, 1)">
-        <rect x="0" y="0" height="20" width="17615590" />
-        <rect x="0" y="25" height="20" width="16264984" />
-        <rect x="0" y="50" height="20" width="14411662" />
-        <rect x="0" y="75" height="20" width="14263332" />
-        <rect x="0" y="100" height="20" width="13977602" />
-        <rect x="0" y="125" height="20" width="13747792" />
-        <rect x="0" y="150" height="20" width="13414372" />
-        <rect x="0" y="175" height="20" width="13338863" />
-        <rect x="0" y="200" height="20" width="12984143" />
-        <rect x="0" y="200" height="20" width="12811488" />
-      </g>
-      <g transform="translate(0,30)">
-        <text x="0" y="0">명량</text>
-        <text x="0" y="25">극한직업</text>
-        <text x="0" y="50">신과함께: 죄와 벌</text>
-        <text x="0" y="75">국제시장</text>
-        <text x="0" y="100">어벤져스: 엔드게임</text>
-        <text x="0" y="125">겨울왕국 2</text>
-        <text x="0" y="150">베테랑</text>
-        <text x="0" y="175">아바타</text>
-        <text x="0" y="200">도둑들</text>
-        <text x="0" y="225">7번방의 선물</text>
-      </g>
-      <g transform="translate(150, 30)" stroke="black">
-        <line x1="0" y1="0" x2="0" y2="-10" />
-        <line x1="135.25" y1="0" x2="135.25" y2="-10" />
-        <line x1="270.51" y1="0" x2="270.51" y2="-10" />
-        <line x1="405.77" y1="0" x2="405.77" y2="-10" />
-      </g>
-      <g transform="translate(150, 30)" text-anchor="middle">
-        <text x="0" y="-15">0만명</text>
-        <text x="135.25" y="-15">550만명</text>
-        <text x="270.51" y="-15">1100만명</text>
-        <text x="405.77" y="-15">1650만명</text>
-      </g>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <div id="header">
+      <p>Circle?</p>
+    </div>
+
+    <svg width="500px" height="40px">
+      <circle r="20" cx="50" cy="20" />
     </svg>
+    <div class="footer">
+      <p>Yes</p>
+    </div>
+
+    <script>
+      // d3.select, selection.text
+      console.log(d3.select('p').text())
+      console.log(d3.select('.footer').select('p').text())
+
+      // selection.attr
+      const myCircle = d3.select('circle')
+      myCircle.attr('fill', 'red')
+      myCircle.attr('r', 5)
+
+      // selection.style
+      d3.select('p').style('font-family', 'Arial')
+
+      // selection.append, selection.remove
+      d3.select('#header')
+        .append('p')
+        .text('(Add text)')
+        .style('font-style', 'italic')
+        .style('color', 'gray')
+
+      d3.selectAll('div').remove()
+    </script>
   </body>
 </html>

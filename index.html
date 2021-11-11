@@ -1,11 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <style>
+      .linecap-demo {
+        stroke: darkmagenta;
+        stroke-width: 5;
+      }
+
+      .svgtext {
+        text-anchor: middle;
+        fill: lightgrey;
+      }
+      .svgrect {
+        fill: crimson;
+        opacity: 0.5;
+      }
+
+      .blue-group {
+        fill: blue;
+        stroke-width: 3;
+      }
+      .red-group {
+        fill: red;
+        stroke-width: 4;
+        font-weight: bold;
+      }
+      .green-group {
+        fill: green;
+        stroke-width: 3;
+        fill-opacity: 0.5;
+      }
+    </style>
+  </head>
   <body>
     <p>SVG로 도형 그리기</p>
 
     <svg width="500px" height="500px">
       <!-- 원 -->
-      <circle cx="100" cy="50" r="20" />
+      <!-- fill: 도형 내부 색상 채움, 색상은 HEX, RGB 등 여러 방식으로 설정 가능 -->
+      <circle cx="100" cy="50" r="20" fill="darkmagenta" />
+
+      <!-- opacity로 투명도 설정 -->
+      <circle cx="100" cy="300" r="20" fill="rgba(0,0,255,.5)" />
+      <circle cx="120" cy="300" r="20" fill="rgba(0,0,255)" opacity="0.5" />
+
       <!-- 타원 -->
       <ellipse cx="50" cy="25" rx="40" ry="20" />
       <!-- 직사각형 -->
@@ -22,6 +60,81 @@
       <path d="M 100 150 q 150 -150 200 100 l 200 100" />
       <!-- 문자 -->
       <text x="250" y="25" font-size="20">SVG 문자</text>
+      <text x="250" y="300" font-size="20" font-weight="bold">Linecaps</text>
+
+      <!-- 2. stroke 속성 사용하기 -->
+      <!-- stroke: stroke의 색상 -->
+      <!-- stroke-width: stroke의 너비 -->
+      <!-- stroke-opacity: stroke의 투명도 -->
+      <!-- stroke-linecap: stroke의 끝 모양 설정, butt/round/square 세 가지 형태 지정 가능 -->
+      <!-- stroke-dasharray: stroke 마디의 길이를 지정하면서 점선 형태로 설정 -->
+      <text x="50" y="330">Butt</text>
+      <line
+        x1="110"
+        y1="320"
+        x2="200"
+        y2="320"
+        class="linecap-demo"
+        stroke-linecap="butt"
+      />
+      <text x="50" y="350">Round</text>
+      <line
+        x1="110"
+        y1="340"
+        x2="200"
+        y2="340"
+        class="linecap-demo"
+        stroke-linecap="round"
+      />
+      <text x="50" y="370">Square</text>
+      <line
+        x1="110"
+        y1="360"
+        x2="200"
+        y2="360"
+        class="linecap-demo"
+        stroke-linecap="square"
+      />
+    </svg>
+
+    <svg width="500" height="100">
+      <!-- SVG 출력 순서: 선언되는 순서에 따라 그려짐 -->
+      <!-- 코드에 처음 작성된 요소부터 출력 ~ 나중에 코딩된 요소가 맨 앞에 위치 -->
+      <!-- 예시 1 -->
+      <text x="100" y="35" class="svgtext">Text on bottom</text>
+      <rect x="0" y="0" width="200" height="60" class="svgrect" />
+      <!-- 예시 2 -->
+      <rect x="250" y="0" width="200" height="60" class="svgrect" />
+      <text x="350" y="35" class="svgtext">Text on bottom</text>
+    </svg>
+
+    <svg width="500" height="500">
+      <!-- g 태그 활용하기 -->
+      <!-- <g> 태그를 통해 요소를 그룹화 할 수 있습니다 -->
+      <g class="blue-group" transform="scale(1.2)">
+        <text x="0" y="20">Blue group</text>
+        <rect x="0" y="40" width="50" height="50" rx="10" ry="10" />
+        <polygon points="80,30 70,70 130,50" />
+        <line x1="60" y1="75" x2="120" y2="90" stroke="blue" />
+      </g>
+      <g class="red-group" transform="translate(200)">
+        <text x="0" y="20">Red group</text>
+        <rect x="0" y="40" width="50" height="50" rx="10" ry="10" />
+        <polygon points="80,30 70,70 130,50" />
+        <line x1="60" y1="75" x2="120" y2="90" stroke="red" />
+      </g>
+      <g class="green-group" transform="translate(200, 120)">
+        <text x="0" y="20">Green group</text>
+        <rect x="0" y="40" width="50" height="50" rx="10" ry="10" />
+        <polygon points="80,30 70,70 130,50" />
+        <line x1="60" y1="75" x2="120" y2="90" stroke="green" />
+      </g>
+
+      <!-- transform 속성으로 SVG 요소를 변형시키고, 움직이거나 회전시킬 수도 있다 -->
+      <!-- transform="translate(200)" -->
+
+      <!-- transform="scale(1.2)" -->
+      <!-- transform="translate(200, 120)" -->
     </svg>
   </body>
 </html>

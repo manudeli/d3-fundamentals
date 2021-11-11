@@ -1,10 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
-  </head>
-  <body></body>
+  <body>
+    <p>SVG로 도형 그리기</p>
+
+    <svg width="500px" height="500px">
+      <!-- 원 -->
+      <circle cx="100" cy="50" r="20" />
+      <!-- 타원 -->
+      <ellipse cx="50" cy="25" rx="40" ry="20" />
+      <!-- 직사각형 -->
+      <rect x="0" y="100" width="100" height="20" />
+      <!-- 모서리가 둥근 직사각형 -->
+      <rect x="0" y="130" width="100" height="20" rx="10" ry="10" />
+
+      <!-- 다각형 -->
+      <polygon points="100,0 50,50 150,50" />
+      <!-- 선 -->
+      <line x1="0" y1="0" x2="200" y2="50" stroke="black" />
+      <!-- Path -->
+      <!-- (참고 링크: https://developer.mozilla.org/ko/docs/Web/SVG/Tutorial/Paths) -->
+      <path d="M 100 150 q 150 -150 200 100 l 200 100" />
+      <!-- 문자 -->
+      <text x="250" y="25" font-size="20">SVG 문자</text>
+    </svg>
+  </body>
 </html>

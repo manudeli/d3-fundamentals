@@ -22,27 +22,17 @@
   <body>
     <script src="https://d3js.org/d3.v7.min.js"></script>
 
-    <button onclick="insertBox1()">Insert</button>
-    <div id="insertBox1">
-      <div class="box pink-box"></div>
-      <div class="box pink-box"></div>
-      <div class="box pink-box"></div>
-    </div>
-
-    <button onclick="insertBox2()">Insert</button>
-    <div id="insertBox2">
+    <button onclick="cloneBoxes()">Insert</button>
+    <div id="cloneBoxes">
       <div class="box pink-box"></div>
       <div class="box pink-box"></div>
       <div class="box pink-box"></div>
     </div>
 
     <script>
-      function insertBox1() {
-        d3.select('#insertBox1').insert('div').classed('box aqua-box', true)
-      }
-      function insertBox2() {
-        d3.selectAll('#insertBox2 > div')
-          .insert('div')
+      function cloneBoxes() {
+        d3.selectAll('#cloneBoxes div')
+          .clone(false)
           .classed('box aqua-box', true)
       }
     </script>

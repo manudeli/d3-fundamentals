@@ -21,19 +21,40 @@
   </head>
   <body>
     <script src="https://d3js.org/d3.v7.min.js"></script>
-
-    <button onclick="cloneBoxes()">Insert</button>
-    <div id="cloneBoxes">
-      <div class="box pink-box"></div>
-      <div class="box pink-box"></div>
-      <div class="box pink-box"></div>
+    <div>
+      <button onclick="raise()">Raise</button>
+      <svg class="raiseSVG" width="300" height="60">
+        <circle r="25" cx="30" cy="30" fill="lightblue" />
+        <circle class="pink" r="25" cx="90" cy="30" fill="pink" />
+        <circle class="violet" r="25" cx="150" cy="30" fill="violet" />
+        <circle r="25" cx="210" cy="30" fill="lightblue" />
+      </svg>
+    </div>
+    <div>
+      <button onclick="lower()">Lower</button>
+      <svg class="lowerSVG" width="300" height="60">
+        <circle r="25" cx="30" cy="30" fill="lightblue" />
+        <circle class="pink" r="25" cx="90" cy="30" fill="pink" />
+        <circle class="violet" r="25" cx="150" cy="30" fill="violet" />
+        <circle r="25" cx="210" cy="30" fill="lightblue" />
+      </svg>
     </div>
 
     <script>
-      function cloneBoxes() {
-        d3.selectAll('#cloneBoxes div')
-          .clone(false)
-          .classed('box aqua-box', true)
+      function raise() {
+        d3.select('.raiseSVG').selectAll('.pink,.violet').raise()
+
+        d3.select('.raiseSVG')
+          .selectAll('circle')
+          .attr('cx', (d, i) => 30 + i * 60)
+      }
+
+      function lower() {
+        d3.select('.lowerSVG').selectAll('.pink,.violet').lower()
+
+        d3.select('.lowerSVG')
+          .selectAll('circle')
+          .attr('cx', (d, i) => 30 + i * 60)
       }
     </script>
   </body>

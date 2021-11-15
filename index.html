@@ -6,7 +6,7 @@
   <body>
     <svg id="bargraph" width="400" height="100"></svg>
 
-    <button onclick="sortData()">Sort</button>
+    <button onclick="getNode()">Node</button>
 
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script>
@@ -41,18 +41,20 @@
         .attr('y', (d, i) => i * 20 + 17)
         .attr('text-anchor', 'end')
 
-      function sortData() {
-        d3.select('#bargraph')
-          .selectAll('rect')
-          .sort((a, b) => d3.ascending(a.population, b.population))
-          .attr('y', (d, i) => i * 20)
+      d3.select('#bargraph')
+        .selectAll('rect')
+        .sort((a, b) => d3.ascending(a.population, b.population))
+        .attr('y', (d, i) => i * 20)
 
-        d3.select('#bargraph')
-          .selectAll('text')
-          .sort((a, b) => d3.ascending(a.population, b.population))
-          .attr('y', (d, i) => i * 20 + 17)
+      d3.select('#bargraph')
+        .selectAll('text')
+        .sort((a, b) => d3.ascending(a.population, b.population))
+        .attr('y', (d, i) => i * 20 + 17)
 
+      function getNode() {
         const barRect = d3.select('#bargraph').selectAll('rect')
+        console.log(barRect.nodes())
+        console.log(barRect.node())
       }
     </script>
   </body>

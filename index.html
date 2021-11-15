@@ -2,59 +2,57 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <style>
-      .box {
-        width: 50px;
-        height: 50px;
-        margin: 5px;
-        display: inline-block;
-        color: white;
-        padding: 5px;
-      }
-      .pink-box {
-        background-color: pink;
-      }
-      .aqua-box {
-        background-color: lightblue;
-      }
-    </style>
   </head>
   <body>
+    <svg id="bargraph" width="400" height="100"></svg>
+
+    <button onclick="sortData()">Sort</button>
+
     <script src="https://d3js.org/d3.v7.min.js"></script>
-    <div>
-      <button onclick="raise()">Raise</button>
-      <svg class="raiseSVG" width="300" height="60">
-        <circle r="25" cx="30" cy="30" fill="lightblue" />
-        <circle class="pink" r="25" cx="90" cy="30" fill="pink" />
-        <circle class="violet" r="25" cx="150" cy="30" fill="violet" />
-        <circle r="25" cx="210" cy="30" fill="lightblue" />
-      </svg>
-    </div>
-    <div>
-      <button onclick="lower()">Lower</button>
-      <svg class="lowerSVG" width="300" height="60">
-        <circle r="25" cx="30" cy="30" fill="lightblue" />
-        <circle class="pink" r="25" cx="90" cy="30" fill="pink" />
-        <circle class="violet" r="25" cx="150" cy="30" fill="violet" />
-        <circle r="25" cx="210" cy="30" fill="lightblue" />
-      </svg>
-    </div>
-
     <script>
-      function raise() {
-        d3.select('.raiseSVG').selectAll('.pink,.violet').raise()
+      const homelessData = [
+        { state: 'California', population: 134278 },
+        { state: 'Florida', population: 32190 },
+        { state: 'Washington', population: 21112 },
+        { state: 'New York', population: 89503 },
+        { state: 'Texas', population: 23548 },
+      ]
 
-        d3.select('.raiseSVG')
-          .selectAll('circle')
-          .attr('cx', (d, i) => 30 + i * 60)
-      }
+      const barGroup = d3.select('#bargraph').append('g')
 
-      function lower() {
-        d3.select('.lowerSVG').selectAll('.pink,.violet').lower()
+      barGroup
+        .selectAll('rect')
+        .data(homelessData)
+        .enter()
+        .append('rect')
+        .attr('height', 19)
+        .attr('width', (d) => d.population / 500)
+        .attr('x', 100)
+        .attr('y', (d, i) => i * 20)
+        .attr('fill', 'pink')
 
-        d3.select('.lowerSVG')
-          .selectAll('circle')
-          .attr('cx', (d, i) => 30 + i * 60)
+      barGroup
+        .selectAll('text')
+        .data(homelessData)
+        .enter()
+        .append('text')
+        .text((d) => d.state)
+        .attr('x', 96)
+        .attr('y', (d, i) => i * 20 + 17)
+        .attr('text-anchor', 'end')
+
+      function sortData() {
+        d3.select('#bargraph')
+          .selectAll('rect')
+          .sort((a, b) => d3.ascending(a.population, b.population))
+          .attr('y', (d, i) => i * 20)
+
+        d3.select('#bargraph')
+          .selectAll('text')
+          .sort((a, b) => d3.ascending(a.population, b.population))
+          .attr('y', (d, i) => i * 20 + 17)
+
+        const barRect = d3.select('#bargraph').selectAll('rect')
       }
     </script>
   </body>

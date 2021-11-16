@@ -79,6 +79,12 @@
         .domain([0, d3.max(data, (d) => d.value)])
         .range([0, width])
 
+      const y = d3
+        .scaleBand()
+        .domain(nameList)
+        .range([0, 170])
+        .paddingInner(0.2)
+
       const body = d3.select('body')
 
       body.append('h2').text('2019년 1000만 관객 기록한 영화 관객수 TOP7')
@@ -108,7 +114,7 @@
         .data(data)
         .join('rect')
         .attr('x', '0')
-        .attr('y', (d, i) => i * barSpacing)
+        .attr('y', (d, i) => y(d.name))
         .attr('height', barHeight)
         .attr('width', (d) => x(d.value))
 

@@ -6,10 +6,6 @@
         font-family: Arial, Helvetica, sans-serif;
         font-size: 13px;
       }
-      svg {
-        width: 600px;
-        height: 500px;
-      }
       .top-label {
         font-size: 13px;
         font-style: italic;
@@ -71,8 +67,10 @@
       ]
       const nameList = data.map((d) => d.name)
       const valueList = data.map((d) => d.value)
+
+      const margin = { top: 30, right: 50, bottom: 0, left: 150 }
       const width = 400
-      const translateText = `translate(150,30)`
+      const height = 170
 
       const x = d3
         .scaleLinear()
@@ -99,11 +97,14 @@
 
       body.append('div').attr('class', 'clearfix')
 
-      const svg = body.append('svg')
-      const barGroup = svg
+      const svgGroup = body
+        .append('svg')
+        .attr('width', width + margin.left + margin.right)
+        .attr('height', height + margin.top + margin.bottom)
         .append('g')
-        .attr('class', 'bar')
-        .attr('transform', `${translateText}`)
+        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
+
+      const barGroup = svgGroup.append('g').attr('class', 'bar')
 
       const barHeight = 20,
         barGap = 5,
@@ -118,7 +119,7 @@
         .attr('height', barHeight)
         .attr('width', (d) => x(d.value))
 
-      const barLabel = svg.append('g').attr('class', 'bar-label')
+      const barLabel = svgGroup.append('g').attr('class', 'bar-label')
 
       barLabel
         .selectAll('text')
@@ -132,15 +133,8 @@
       const tickGap = -5
       const axisData = [0, 5601253, 11202506, 16803759]
 
-      const xAxis = svg
-        .append('g')
-        .attr('transform', `${translateText}`)
-        .attr('stroke', 'black')
-
-      const xScale = svg
-        .append('g')
-        .attr('transform', `${translateText}`)
-        .attr('class', 'axis-label')
+      const xAxis = svgGroup.append('g').attr('stroke', 'black')
+      const xScale = svgGroup.append('g').attr('class', 'axis-label')
 
       xAxis
         .selectAll('line')

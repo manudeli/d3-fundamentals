@@ -36,7 +36,11 @@
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script>
       const makeChart = async () => {
-        const data = await d3.json('./data/movie.json')
+        const res = await d3.csv('./data/movie.csv')
+        const data = res.map(({ name, value }) => ({
+          name,
+          value: parseInt(value),
+        }))
 
         const nameList = data.map((d) => d.name)
         const valueList = data.map((d) => d.value)

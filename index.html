@@ -77,11 +77,18 @@
         .domain([0, d3.max(data, (d) => d.value)])
         .range([0, width])
 
+      const xAxis = d3
+        .axisTop(x)
+        .ticks(4)
+        .tickFormat((d, i) => `${!!d ? Math.floor(d / 10000) : d}만명`)
+
       const y = d3
         .scaleBand()
         .domain(nameList)
         .range([0, 170])
         .paddingInner(0.2)
+
+      const yAxis = d3.axisLeft(y)
 
       const body = d3.select('body')
 
@@ -119,39 +126,13 @@
         .attr('height', barHeight)
         .attr('width', (d) => x(d.value))
 
-      const barLabel = svgGroup.append('g').attr('class', 'bar-label')
-
-      barLabel
-        .selectAll('text')
-        .data(data)
-        .join('text')
-        .attr('x', '140')
-        .attr('y', (d, i) => barHeight * (i + 2) + barGap * (i + 1))
-        .text((d) => d.name)
-
       const tickHeight = -10
       const tickGap = -5
       const axisData = [0, 5601253, 11202506, 16803759]
 
-      const xAxis = svgGroup.append('g').attr('stroke', 'black')
-      const xScale = svgGroup.append('g').attr('class', 'axis-label')
+      svgGroup.append('g').call(xAxis).attr('class', 'x-axis')
 
-      xAxis
-        .selectAll('line')
-        .data(axisData)
-        .join('line')
-        .attr('x1', (d, i) => x(d))
-        .attr('y1', '0')
-        .attr('x2', (d, i) => x(d))
-        .attr('y2', tickHeight)
-
-      xScale
-        .selectAll('text')
-        .data(axisData)
-        .join('text')
-        .attr('x', (d, i) => x(d))
-        .attr('y', tickGap + tickHeight)
-        .text((d, i) => `${!!d ? Math.floor(d / 10000) : d}만명`)
+      svgGroup.append('g').call(yAxis).attr('class', 'y-axis')
     </script>
   </body>
 </html>

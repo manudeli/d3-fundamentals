@@ -30,20 +30,27 @@
       .axis-label {
         text-anchor: middle;
       }
+      .button {
+        float: left;
+        margin-left: 10px;
+        cursor: pointer;
+      }
+      .selected {
+        font-weight: bold;
+      }
     </style>
   </head>
   <body>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script>
       const makeChart = async () => {
-        const res = await d3.csv('./data/movie.csv')
-        const data = res.map(({ name, value }) => ({
-          name,
-          value: parseInt(value),
-        }))
-
-        const nameList = data.map((d) => d.name)
-        const valueList = data.map((d) => d.value)
+        const data = await d3.json('./data/movie2.json')
+        let year = '2019'
+        let selectedData = data.filter((el) => el.year === year)
+        const nameList = selectedData.map((d) => d.name)
+        const valueList = selectedData.map((d) => d.value)
+        const years = ['2020', '2019', '2018', '2017', '2016', '2015']
+        const title = '년 1000만 관객 기록한 영화 관객수 TOP7'
 
         const margin = { top: 30, right: 50, bottom: 0, left: 150 }
         const width = 400
@@ -51,7 +58,7 @@
 
         const x = d3
           .scaleLinear()
-          .domain([0, d3.max(data, (d) => d.value)])
+          .domain([0, d3.max(selectedData, (d) => d.value)])
           .range([0, width])
 
         const xAxis = d3
@@ -69,7 +76,22 @@
 
         const body = d3.select('body')
 
-        body.append('h2').text('2019년 1000만 관객 기록한 영화 관객수 TOP7')
+        body.append('h2').text(year + title)
+
+        const buttons = body
+          .append('div')
+          .attr('class', 'buttons-container')
+          .selectAll('div')
+          .data(years)
+          .join('div')
+          .text((d) => d)
+          .attr('class', (d) => {
+            if (d === year) {
+              return 'button selected'
+            } else {
+              return 'button'
+            }
+          })
 
         body
           .append('div')
@@ -97,9 +119,9 @@
           barGap = 5,
           barSpacing = barHeight + barGap
 
-        barGroup
+        const bars = barGroup
           .selectAll('rect')
-          .data(data)
+          .data(selectedData)
           .join('rect')
           .attr('x', '0')
           .attr('y', (d, i) => y(d.name))
@@ -113,6 +135,28 @@
         svgGroup.append('g').call(xAxis).attr('class', 'x-axis')
 
         svgGroup.append('g').call(yAxis).attr('class', 'y-axis')
+
+        buttons.on('click', function (el, d) {
+          d3.select('.selected').classed('selected', false)
+          d3.select(this).classed('selected', true)
+
+          year = d
+          selectedData = data.filter((el) => el.year === year)
+
+          y.domain(selectedData.map((d) => d.name))
+          const yAxis = d3.axisLeft(y)
+          svgGroup.selectAll('g.y-axis').call(yAxis)
+          bars
+            .data(selectedData)
+            .transition()
+            .duration(500)
+            .delay(100)
+            .ease(d3.easeBounce) // easeBack, easeLinear
+            .attr('y', (d) => y(d.name))
+            .attr('width', (d) => x(d.value))
+
+          body.selectAll('h2').text(year + title)
+        })
       }
       makeChart()
     </script>

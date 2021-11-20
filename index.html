@@ -38,19 +38,34 @@
       .selected {
         font-weight: bold;
       }
+      .play-button {
+        margin-left: 10px;
+        margin-bottom: 15px;
+        font-style: italic;
+        cursor: pointer;
+        color: grey;
+        transition: color 150ms;
+      }
+      .play-button:hover {
+        color: black;
+      }
     </style>
   </head>
   <body>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script>
+      const keys = (d) => {
+        return d.name
+      }
+
       const makeChart = async () => {
-        const data = await d3.json('./data/movie2.json')
+        const data = await d3.json('./data/sample.json')
         let year = '2019'
         let selectedData = data.filter((el) => el.year === year)
         const nameList = selectedData.map((d) => d.name)
         const valueList = selectedData.map((d) => d.value)
         const years = ['2020', '2019', '2018', '2017', '2016', '2015']
-        const title = '년 1000만 관객 기록한 영화 관객수 TOP7'
+        const title = '년 연령별 데이터'
 
         const margin = { top: 30, right: 50, bottom: 0, left: 150 }
         const width = 400
@@ -78,6 +93,11 @@
 
         body.append('h2').text(year + title)
 
+        const playAll = body
+          .append('div')
+          .attr('class', 'play-button')
+          .text('▶ PLAY ALL YEARS')
+
         const buttons = body
           .append('div')
           .attr('class', 'buttons-container')
@@ -97,9 +117,9 @@
           .append('div')
           .attr('class', 'top-label movie-label')
           .append('p')
-          .text('영화')
+          .text('연령')
 
-        body.append('div').attr('class', 'top-label').append('p').text('관객수')
+        body.append('div').attr('class', 'top-label').append('p').text('인원')
 
         body.append('div').attr('class', 'clearfix')
 
@@ -121,7 +141,7 @@
 
         const bars = barGroup
           .selectAll('rect')
-          .data(selectedData)
+          .data(selectedData, keys)
           .join('rect')
           .attr('x', '0')
           .attr('y', (d, i) => y(d.name))
@@ -136,18 +156,39 @@
 
         svgGroup.append('g').call(yAxis).attr('class', 'y-axis')
 
-        buttons.on('click', function (el, d) {
-          d3.select('.selected').classed('selected', false)
-          d3.select(this).classed('selected', true)
+        let playInterval
 
-          year = d
+        buttons.on('click', function (el, d) {
+          clearInterval(playInterval)
+          update(d)
+        })
+
+        playAll.on('click', function (el, d) {
+          let i = 0
+          playInterval = setInterval(() => {
+            update(years[i])
+            i++
+
+            if (i > years.length) {
+              clearInterval(playInterval)
+              update(years[0])
+            }
+          }, 1500)
+        })
+
+        function update(updateYear) {
+          d3.select('.selected').classed('selected', false)
+          // filter
+          buttons.filter((d) => d === updateYear).classed('selected', true)
+
+          year = updateYear
           selectedData = data.filter((el) => el.year === year)
 
           y.domain(selectedData.map((d) => d.name))
           const yAxis = d3.axisLeft(y)
           svgGroup.selectAll('g.y-axis').call(yAxis)
           bars
-            .data(selectedData)
+            .data(selectedData, keys)
             .transition()
             .duration(500)
             .delay(100)
@@ -156,7 +197,7 @@
             .attr('width', (d) => x(d.value))
 
           body.selectAll('h2').text(year + title)
-        })
+        }
       }
       makeChart()
     </script>

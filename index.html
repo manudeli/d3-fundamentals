@@ -7,8 +7,19 @@
         font-size: 13px;
       }
       .line-path {
-        fill: steelblue;
-        stroke: steelblue;
+        fill: #fff2f2;
+        stroke: #fff2f2;
+      }
+      .area-group {
+        fill: none;
+        stroke-width: 1.5;
+        stroke-miterlimit: 1;
+      }
+      .area1-path {
+        stroke: #2b00c7;
+      }
+      .area2-path {
+        stroke: #a10028;
       }
     </style>
   </head>
@@ -54,8 +65,19 @@
         const area = d3
           .area()
           .x((d) => xScale(d.date))
-          .y0(yScale(0))
+          .y0((d) => yScale(d.lower))
           .y1((d) => yScale(d.close))
+
+        const areaSubGroup = svg.append('g').attr('class', 'area-group')
+
+        areaSubGroup
+          .append('path')
+          .attr('class', 'area1-path')
+          .attr('d', area.lineY0()(data))
+        areaSubGroup
+          .append('path')
+          .attr('class', 'area2-path')
+          .attr('d', area.lineY1()(data))
 
         svg
           .append('path')

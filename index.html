@@ -6,80 +6,76 @@
   <body>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script>
-      // 먼저 간단한 svg 요소 추가
       const body = d3.select('body')
       const svg = body.append('svg').attr('width', 1000).attr('height', 1000)
 
-      // Hex code: #69b3a2
-      svg
-        .append('circle')
-        .attr('cx', 50)
-        .attr('cy', 100)
-        .attr('r', 20)
-        .attr('fill', d3.color('#69b3a2'))
+      const data = Array.from({ length: 10 }, (_, i) => i + 1)
+      const data2 = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
 
-      // RGBA: rgba(198, 45, 205, 0.8)
-      svg
-        .append('circle')
-        .attr('cx', 150)
-        .attr('cy', 100)
-        .attr('r', 20)
-        .attr('fill', d3.color('rgba(198, 45, 205, 0.8)'))
-
-      // RGB: rgb(12, 240, 233)
-      svg
-        .append('circle')
-        .attr('cx', 250)
-        .attr('cy', 100)
-        .attr('r', 20)
-        .attr('fill', d3.color('rgb(12, 240, 233)'))
+      // 1. scaleLinear & white-blue
+      const myColor1 = d3.scaleLinear().domain([1, 10]).range(['white', 'blue'])
 
       svg
-        .append('circle')
-        .attr('cx', 350)
-        .attr('cy', 100)
-        .attr('r', 20)
-        .attr('fill', d3.color('steelblue'))
+        .selectAll('.firstrow')
+        .data(data)
+        .join('circle')
+        .attr('cx', (d, i) => 30 + i * 60)
+        .attr('cy', 50)
+        .attr('r', 19)
+        .attr('fill', myColor1)
 
-      // opacity
-      const color1 = d3.color('steelblue')
-      color1.opacity = 0.5
+      // 2. scaleSequential & interpolateRainbow or interpolateGreens
+      const myColor2 = d3
+        .scaleSequential()
+        .domain([1, 10])
+        .interpolator(d3.interpolateRainbow)
+
       svg
-        .append('circle')
-        .attr('cx', 450)
-        .attr('cy', 100)
-        .attr('r', 20)
-        .attr('fill', color1)
+        .selectAll('.secondrow')
+        .data(data)
+        .join('circle')
+        .attr('cx', (d, i) => 30 + i * 60)
+        .attr('cy', 150)
+        .attr('r', 19)
+        .attr('fill', myColor2)
 
-      // brighter
-      let color2 = d3.color('steelblue')
-      const n = 5
-      for (let i = 0; i < n; i++) {
-        if (i != 0) {
-          color2 = color2.brighter(1)
-        }
-        svg
-          .append('circle')
-          .attr('cx', 50 * (2 * i + 1))
-          .attr('cy', 200)
-          .attr('r', 20)
-          .attr('fill', color2)
-      }
+      // 1. scaleOrdinal & 직접 컬러 지정하기
+      const myColor3 = d3
+        .scaleOrdinal()
+        .domain(data)
+        .range([
+          'gold',
+          'blue',
+          'green',
+          'yellow',
+          'black',
+          'grey',
+          'darkgreen',
+          'pink',
+          'brown',
+          'slateblue',
+        ])
 
-      // darker
-      let color3 = d3.color('steelblue')
-      const o = 10
-      for (let i = 0; i < o; i++) {
-        if (i != 0) {
-          color3 = color3.darker(0.5)
-        }
-        svg
-          .append('circle')
-          .attr('cx', 50 * (2 * i + 1))
-          .attr('cy', 300)
-          .attr('r', 20)
-          .attr('fill', color3)
-      }
+      svg
+        .selectAll('.firstrow')
+        .data(data2)
+        .join('circle')
+        .attr('cx', (d, i) => 30 + i * 60)
+        .attr('cy', 200)
+        .attr('r', 19)
+        .attr('fill', myColor3)
+
+      // 2. scaleOrdinal & schemeSet3
+      const myColor4 = d3.scaleOrdinal().domain(data2).range(d3.schemeSet3)
+
+      svg
+        .selectAll('.firstrow')
+        .data(data2)
+        .join('circle')
+        .attr('cx', (d, i) => 30 + i * 60)
+        .attr('cy', 250)
+        .attr('r', 19)
+        .attr('fill', myColor4)
     </script>
   </body>
 </html>

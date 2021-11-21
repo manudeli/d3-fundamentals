@@ -7,9 +7,8 @@
         font-size: 13px;
       }
       .line-path {
-        fill: none;
+        fill: steelblue;
         stroke: steelblue;
-        stroke-width: 1.5;
       }
     </style>
   </head>
@@ -48,12 +47,31 @@
           .domain([0, d3.max(data, (d) => d.close)])
           .range([height - margin.bottom, margin.top])
 
-        const line = d3
-          .line()
-          .x((d) => xScale(d.date))
-          .y((d) => yScale(d.close))
+        const xAxis = d3.axisBottom(xScale).ticks(5).tickSizeOuter(0)
 
-        svg.append('path').attr('class', 'line-path').attr('d', line(data))
+        const yAxis = d3.axisLeft(yScale).ticks(6)
+
+        const area = d3
+          .area()
+          .x((d) => xScale(d.date))
+          .y0(yScale(0))
+          .y1((d) => yScale(d.close))
+
+        svg
+          .append('path')
+          .data([data])
+          .attr('class', 'line-path')
+          .attr('d', area)
+
+        svg
+          .append('g')
+          .attr('transform', 'translate(0,' + (height - margin.bottom) + ')')
+          .call(xAxis)
+
+        svg
+          .append('g')
+          .attr('transform', 'translate(' + margin.left + ',0)')
+          .call(yAxis)
       }
 
       makeChart()

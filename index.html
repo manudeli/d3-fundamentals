@@ -6,20 +6,11 @@
         font-family: Arial, Helvetica, sans-serif;
         font-size: 13px;
       }
-      .line-path {
-        fill: #fff2f2;
-        stroke: #fff2f2;
+      .arc-path {
+        fill: steelblue;
       }
-      .area-group {
-        fill: none;
-        stroke-width: 1.5;
-        stroke-miterlimit: 1;
-      }
-      .area1-path {
-        stroke: #2b00c7;
-      }
-      .area2-path {
-        stroke: #a10028;
+      .arc-text {
+        fill: white;
       }
     </style>
   </head>
@@ -31,75 +22,52 @@
         const height = 240
         const margin = { top: 20, right: 30, bottom: 30, left: 40 }
 
-        const data = [
-          {
-            month: new Date(2018, 1, 1),
-            fruitSales: { apple: 10, banana: 20, orange: 15 },
-          },
-          {
-            month: new Date(2018, 2, 1),
-            fruitSales: { apple: 15, banana: 15, orange: 15 },
-          },
-          {
-            month: new Date(2018, 3, 1),
-            fruitSales: { apple: 20, banana: 25, orange: 15 },
-          },
+        const fruits = [
+          { name: '🍇', count: 21 },
+          { name: '🍈', count: 13 },
+          { name: '🍉', count: 8 },
+          { name: '🍊', count: 5 },
+          { name: '🍋', count: 3 },
+          { name: '🍌', count: 2 },
+          { name: '🍍', count: 1 },
+          { name: '🥭', count: 1 },
         ]
 
-        const fruits = ['apple', 'banana', 'orange']
+        const pie = d3.pie().value((d) => d.count)(fruits)
+
+        const arc = d3
+          .arc()
+          .innerRadius(40)
+          .outerRadius(100)
+          .padAngle(0.005)
+          .cornerRadius(1)
 
         const body = d3.select('body')
         const svg = body
           .append('svg')
-          .attr('width', width + margin.left + margin.right)
-          .attr('height', height + margin.top + margin.bottom)
+          .attr('viewBox', [-width / 2, -height / 2, width, height])
 
-        const stack = d3
-          .stack()
-          .keys(fruits)
-          .value((obj, key) => obj.fruitSales[key])
+        pie.forEach((d) => {
+          svg.append('path').attr('class', 'arc-path').attr('d', arc(d))
 
-        const series = stack(data)
+          const text = svg
+            .append('text')
+            .attr('class', 'arc-text')
+            .attr('transform', 'translate(' + arc.centroid(d).join(',') + ')')
 
-        const xScale = d3
-          .scaleTime()
-          .domain([data[0].month, data[2].month])
-          .range([margin.left, width - margin.right])
-        const yScale = d3
-          .scaleLinear()
-          .domain([0, 60])
-          .range([height - margin.bottom, margin.top])
-        const colorScale = d3
-          .scaleOrdinal()
-          .domain(fruits)
-          .range(['red', 'yellow', 'orange'])
+          text
+            .append('tspan')
+            .attr('x', '0')
+            .style('font-size', '5')
+            .text(d.data.name)
 
-        const area = d3
-          .area()
-          .x((d) => xScale(d.data.month))
-          .y0((d) => yScale(d[0]))
-          .y1((d) => yScale(d[1]))
-
-        const xAxis = d3.axisBottom(xScale)
-        const yAxis = d3.axisLeft(yScale)
-
-        svg
-          .append('g')
-          .attr('transform', `translate(0, ${height - margin.bottom})`)
-          .call(xAxis)
-
-        svg
-          .append('g')
-          .attr('transform', `translate(${margin.left}, 0)`)
-          .call(yAxis)
-
-        svg
-          .append('g')
-          .selectAll('path')
-          .data(series)
-          .join('path')
-          .attr('d', area)
-          .attr('fill', (d) => colorScale(d.key))
+          text
+            .append('tspan')
+            .attr('x', '0')
+            .attr('dy', '1.3em')
+            .style('font-size', '5')
+            .text(d.value.toLocaleString('en'))
+        })
       }
 
       makeChart()

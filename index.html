@@ -1,73 +1,80 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset="utf-8" />
     <style>
-      body {
-        font-family: Arial, Helvetica, sans-serif;
-        font-size: 13px;
-      }
-      .arc-path {
+      rect {
         fill: steelblue;
-      }
-      .arc-text {
-        fill: white;
       }
     </style>
   </head>
   <body>
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <div id="header">
+      <p>2015~2020년 영화Top7 관객수 (막대 차트)</p>
+    </div>
     <script>
-      const makeChart = async () => {
-        const width = 475
-        const height = 240
-        const margin = { top: 20, right: 30, bottom: 30, left: 40 }
+      async function getData() {
+        const json = await d3.json('./data/movie.json')
+        return json
+        // movie.json
+      }
 
-        const fruits = [
-          { name: '🍇', count: 21 },
-          { name: '🍈', count: 13 },
-          { name: '🍉', count: 8 },
-          { name: '🍊', count: 5 },
-          { name: '🍋', count: 3 },
-          { name: '🍌', count: 2 },
-          { name: '🍍', count: 1 },
-          { name: '🥭', count: 1 },
-        ]
+      async function makeChart() {
+        const data = await getData()
+        const names = data.reduce((acc, cur) => {
+          acc.push(cur.name)
+          const s = new Set(acc)
+          return Array.from(s)
+        }, [])
 
-        const pie = d3.pie().value((d) => d.count)(fruits)
-
-        const arc = d3
-          .arc()
-          .innerRadius(40)
-          .outerRadius(100)
-          .padAngle(0.005)
-          .cornerRadius(1)
+        const margin = { top: 10, right: 50, bottom: 30, left: 50 }
+        const width = 800 - margin.left - margin.right
+        const height = 300 - margin.top - margin.bottom
 
         const body = d3.select('body')
         const svg = body
           .append('svg')
-          .attr('viewBox', [-width / 2, -height / 2, width, height])
+          .attr('width', width + margin.left + margin.right)
+          .attr('height', height + margin.top + margin.bottom)
 
-        pie.forEach((d) => {
-          svg.append('path').attr('class', 'arc-path').attr('d', arc(d))
+        const xScale = d3
+          .scaleBand()
+          .domain(names)
+          .range([margin.left, width - margin.right])
+          .paddingInner(0.2)
 
-          const text = svg
-            .append('text')
-            .attr('class', 'arc-text')
-            .attr('transform', 'translate(' + arc.centroid(d).join(',') + ')')
+        const yScale = d3
+          .scaleLinear()
+          .domain([0, d3.max(data, (d) => d.value)])
+          .range([height - margin.bottom, margin.top])
 
-          text
-            .append('tspan')
-            .attr('x', '0')
-            .style('font-size', '5')
-            .text(d.data.name)
+        const xAxis = d3.axisBottom(xScale)
+        const yAxis = d3.axisLeft(yScale)
 
-          text
-            .append('tspan')
-            .attr('x', '0')
-            .attr('dy', '1.3em')
-            .style('font-size', '5')
-            .text(d.value.toLocaleString('en'))
-        })
+        const chart = svg
+          .append('g')
+          .attr('transform', `translate(${margin.left},${margin.top})`)
+
+        chart
+          .append('g')
+          .attr('transform', `translate(0,${height - margin.bottom})`)
+          .call(xAxis)
+
+        chart
+          .append('g')
+          .attr('transform', `translate(${margin.left},0)`)
+          .call(yAxis)
+
+        chart
+          .append('g')
+          .selectAll('rect')
+          .data(data)
+          .join('rect')
+          .attr('x', (d) => xScale(d.name))
+          .attr('y', (d) => yScale(d.value))
+          .attr('width', xScale.bandwidth())
+          .attr('height', (d) => yScale(0) - yScale(d.value))
       }
 
       makeChart()

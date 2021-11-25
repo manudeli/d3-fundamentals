@@ -3,6 +3,9 @@
   <head>
     <meta charset="utf-8" />
     <style>
+      .select-box {
+        display: block;
+      }
       .axis-label {
         fill: black;
         font-size: 10px;
@@ -62,6 +65,14 @@
         const height = 400 - margin.top - margin.bottom
 
         const body = d3.select('body')
+
+        const select = body.append('select').attr('class', 'select-box')
+
+        select
+          .selectAll('option')
+          .data(['All', ...data.members])
+          .join('option')
+          .text((d) => d)
 
         const svg = body
           .append('svg')
@@ -198,6 +209,28 @@
           .attr('y', 9.5)
           .attr('dy', '0.35em')
           .text((d) => d)
+
+        d3.select('.select-box').on('change', function (el, d) {
+          const selectedValue = d3.select('.select-box').property('value')
+
+          lineGroup
+            .select('.line-path')
+            .style('opacity', (d) =>
+              selectedValue === 'All' || selectedValue === d.member ? 1 : 0
+            )
+          lineGroup
+            .selectAll('text')
+            .attr('fill-opacity', (d) =>
+              selectedValue === 'All' || selectedValue === d.member ? 1 : 0
+            )
+          lineGroup
+            .selectAll('.text-cover')
+            .attr('stroke', (d) =>
+              selectedValue === 'All' || selectedValue === d.member
+                ? 'white'
+                : 'none'
+            )
+        })
       }
 
       makeChart()

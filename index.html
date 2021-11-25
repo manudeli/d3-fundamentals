@@ -2,7 +2,12 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <style></style>
+    <style>
+      .line-path {
+        fill: none;
+        stroke-width: 1.5;
+      }
+    </style>
   </head>
   <body>
     <script src="https://d3js.org/d3.v7.min.js"></script>
@@ -11,73 +16,96 @@
     </div>
     <script>
       const getData = async () => {
-        const csv = await d3.csv('./data/participateCompositionRatio.csv')
-        return csv.map((d) => {
-          d.value = parseFloat(d.value)
-          return d
+        const memberMap = new Map()
+        const datesSet = new Set()
+        const series = []
+
+        const csv = await d3.csv(
+          './data/groupedParticipateByReleaseDateAndMember.csv'
+        )
+        csv.forEach(({ date, member, value }) => {
+          datesSet.add(new Date(date))
+          if (!memberMap.has(member)) {
+            memberMap.set(member, series.length)
+            series.push({ member, values: [] })
+          }
+          const d = series[memberMap.get(member)]
+          d.values.push({
+            member,
+            date: new Date(date),
+            value: parseInt(value),
+          })
         })
+
+        return {
+          series,
+          date: Array.from(datesSet),
+          members: Array.from(memberMap.keys()).sort(),
+        }
       }
 
       const makeChart = async () => {
         const data = await getData()
 
-        const margin = { top: 30, right: 50, bottom: 30, left: 50 }
-        const width = 800 - margin.left - margin.right
-        const height = 300 - margin.top - margin.bottom
+        const margin = { top: 10, right: 50, bottom: 30, left: 50 }
+        const width = 1000 - margin.left - margin.right
+        const height = 400 - margin.top - margin.bottom
 
         const body = d3.select('body')
-
-        const div = body
-          .append('div')
-          .style('width', width + 'px')
-          .style('position', 'relative')
 
         const svg = body
           .append('svg')
           .attr('width', width + margin.left + margin.right)
           .attr('height', height + margin.top + margin.bottom)
-          .attr('viewBox', [-width / 2, -height / 2, width, height])
+          .append('g')
+          .attr(
+            'transform',
+            'translate(' + margin.left + ',' + margin.top + ')'
+          )
 
-        const radius = Math.min(width, height) / 2
-        const arc = d3
-          .arc()
-          .innerRadius(radius * 0.85)
-          .outerRadius(radius - 1)
-          .cornerRadius(40)
+        const xScale = d3
+          .scaleUtc()
+          .domain(d3.extent(data.date))
+          .range([margin.left, width - margin.right])
 
-        const pie = d3
-          .pie()
-          .padAngle(0.02)
-          .value((d) => d.value)(data)
+        const yScale = d3
+          .scaleLinear()
+          .domain([
+            0,
+            d3.max(data.series, (s) => d3.max(s.values, (d) => d.value)),
+          ])
+          .range([height - margin.bottom, margin.top])
 
-        const colorScale = d3
-          .scaleOrdinal()
-          .domain(data.map((d) => d.name))
-          .range(d3.schemeSet3)
+        const xAxis = d3.axisBottom(xScale)
+        const yAxis = d3.axisLeft(yScale)
+
+        const line = d3
+          .line()
+          .x((d) => xScale(d.date))
+          .y((d) => yScale(d.value))
 
         svg
           .append('g')
-          .selectAll('path')
-          .data(pie)
-          .join('path')
-          .attr('fill', (d) => colorScale(d.data.name))
-          .attr('d', arc)
+          .attr('transform', `translate(0, ${height - margin.bottom})`)
+          .call(xAxis)
 
-        const key = '멤버 작곡 참여 비율'
-        div
-          .append('div')
-          .style('position', 'absolute')
-          .style('display', 'flex')
-          .style('align-items', 'center')
-          .style('text-align', 'center')
-          .style('font-size', '50px')
-          .style('font-weight', 'bold')
-          .style('width', width + margin.left + margin.right + 'px')
-          .style('height', height + margin.top + margin.bottom + 'px')
-          .style('color', colorScale(key))
-          .append('div')
-          .style('width', width + margin.left + margin.right + 'px')
-          .text(d3.format('.0%')(data.find((d) => d.name === key).value / 100))
+        svg
+          .append('g')
+          .attr('transform', `translate(${margin.left}, 0)`)
+          .call(yAxis)
+
+        const lineGroup = svg
+          .append('g')
+          .selectAll('g')
+          .data(data.series)
+          .join('g')
+
+        lineGroup
+          .append('path')
+          .attr('d', (d) => line(d.values))
+          .attr('class', 'line-path')
+          .attr('stroke', (d, i) => d3.schemeCategory10[i % 10])
+          .style('opacity', 1)
       }
 
       makeChart()

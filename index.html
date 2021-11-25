@@ -2,235 +2,135 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <style>
-      .select-box {
-        display: block;
-      }
-      .axis-label {
-        fill: black;
-        font-size: 10px;
-        text-anchor: middle;
-      }
-      .line-path {
-        fill: none;
-        stroke-width: 1.5;
-      }
-      .grid-lines {
-        stroke: gray;
-        stroke-opacity: 0.2;
-        stroke-dasharray: 5, 5;
-      }
-    </style>
+    <style></style>
   </head>
   <body>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <div id="header">
-      <p>BTS 작곡 참여도 (원형 차트)</p>
+      <p>2015~2020년 연령별 통계 (누적 막대 차트)</p>
     </div>
     <script>
-      const getData = async () => {
-        const memberMap = new Map()
-        const datesSet = new Set()
-        const series = []
-
-        const csv = await d3.csv(
-          './data/groupedParticipateByReleaseDateAndMember.csv'
-        )
-        csv.forEach(({ date, member, value }) => {
-          datesSet.add(new Date(date))
-          if (!memberMap.has(member)) {
-            memberMap.set(member, series.length)
-            series.push({ member, values: [] })
-          }
-          const d = series[memberMap.get(member)]
-          d.values.push({
-            member,
-            date: new Date(date),
-            value: parseInt(value),
-          })
-        })
-
-        return {
-          series,
-          date: Array.from(datesSet),
-          members: Array.from(memberMap.keys()).sort(),
-        }
+      async function getData() {
+        // sample.json
+        const json = await d3.json('./data/sample.json')
+        return json.sort((a, b) => a.year - b.year)
       }
 
-      const makeChart = async () => {
+      function transformData(data, ages) {
+        const transformData = []
+        const groupedData = d3.groups(data, (d) => d.year)
+
+        groupedData.forEach((group) => {
+          const obj = { year: group[0] }
+          let sum = 0
+          group[1].forEach((d) => {
+            obj[d.name] = d.value
+            sum += d.value
+          })
+          obj.sum = sum
+          transformData.push(obj)
+        })
+        return transformData
+      }
+
+      async function makeChart() {
         const data = await getData()
+        const years = data.reduce((acc, cur) => {
+          acc.push(cur.year)
+          const s = new Set(acc)
+          return Array.from(s)
+        }, [])
+        const ages = data.reduce((acc, cur) => {
+          acc.push(cur.name)
+          const s = new Set(acc)
+          return Array.from(s)
+        }, [])
+        const columnedData = transformData(data, ages)
 
         const margin = { top: 30, right: 50, bottom: 30, left: 50 }
-        const width = 1000 - margin.left - margin.right
-        const height = 400 - margin.top - margin.bottom
+        const width = 800 - margin.left - margin.right
+        const height = 300 - margin.top - margin.bottom
 
         const body = d3.select('body')
-
-        const select = body.append('select').attr('class', 'select-box')
-
-        select
-          .selectAll('option')
-          .data(['All', ...data.members])
-          .join('option')
-          .text((d) => d)
-
         const svg = body
           .append('svg')
           .attr('width', width + margin.left + margin.right)
           .attr('height', height + margin.top + margin.bottom)
 
         const xScale = d3
-          .scaleUtc()
-          .domain(d3.extent(data.date))
+          .scaleBand()
+          .domain(years)
           .range([margin.left, width - margin.right])
+          .paddingInner(0.1)
 
         const yScale = d3
           .scaleLinear()
-          .domain([
-            0,
-            d3.max(data.series, (s) => d3.max(s.values, (d) => d.value)),
-          ])
+          .domain([0, d3.max(columnedData, (d) => d.sum)])
           .range([height - margin.bottom, margin.top])
 
         const colorScale = d3
           .scaleOrdinal()
-          .domain(data.members)
-          .range(d3.schemeCategory10)
+          .domain(ages)
+          .range(d3.schemeTableau10)
 
-        const xAxis = d3.axisBottom(xScale)
-        const yAxis = d3.axisLeft(yScale)
+        const xAxis = d3.axisBottom(xScale).tickSizeOuter(0)
+        const yAxis = d3.axisLeft(yScale).tickSizeOuter(0)
 
-        const line = d3
-          .line()
-          .x((d) => xScale(d.date))
-          .y((d) => yScale(d.value))
+        const stack = d3.stack().keys(ages)
+
+        const series = stack(columnedData)
 
         const chart = svg
           .append('g')
-          .attr(
-            'transform',
-            'translate(' + margin.left + ',' + margin.top + ')'
-          )
+          .attr('transform', `translate(${margin.left},${margin.top})`)
 
         chart
           .append('g')
-          .attr('transform', `translate(0, ${height - margin.bottom})`)
+          .attr('transform', `translate(0,${height - margin.bottom})`)
           .call(xAxis)
-          .append('text')
-          .attr('class', 'axis-label')
-          .text('년도')
-          .attr('x', width / 2)
-          .attr('y', 50)
 
         chart
           .append('g')
-          .attr('transform', `translate(${margin.left}, 0)`)
+          .attr('transform', `translate(${margin.left},0)`)
           .call(yAxis)
-          .append('text')
-          .attr('class', 'axis-label')
-          .text('참여횟수')
-          .attr('transform', 'rotate(-90)')
-          .attr('x', -height / 2)
-          .attr('y', -50)
 
-        chart
-          .append('g')
-          .attr('class', 'grid-lines')
-          .selectAll('line')
-          .data(yScale.ticks())
-          .join('line')
-          .attr('x1', margin.left)
-          .attr('x2', width - margin.right)
-          .attr('y1', yScale)
-          .attr('y2', yScale)
-
-        const lineGroup = chart
+        const rectGroup = chart
           .append('g')
           .selectAll('g')
-          .data(data.series)
+          .data(series)
           .join('g')
+          .attr('fill', (d) => colorScale(d.key))
 
-        lineGroup
-          .append('path')
-          .attr('d', (d) => line(d.values))
-          .attr('class', 'line-path')
-          .attr('stroke', (d) => colorScale(d.member))
-          .style('opacity', 1)
+        rectGroup
+          .selectAll('rect')
+          .data((d) => d)
+          .join('rect')
+          .attr('x', (d) => xScale(d.data.year))
+          .attr('y', (d) => yScale(d[1]))
+          .attr('width', xScale.bandwidth())
+          .attr('height', (d) => yScale(d[0]) - yScale(d[1]))
 
-        lineGroup
-          .append('g')
-          .attr('font-family', 'sans-serif')
-          .attr('font-size', 10)
-          .attr('text-anchor', 'middle')
-          .selectAll('.label-text')
-          .data((d) => d.values)
-          .join('text')
-          .text((d) => d.value)
-          .attr('dy', '0.35em')
-          .attr('x', (d) => xScale(d.date))
-          .attr('y', (d) => yScale(d.value))
-          .call((g) =>
-            g
-              .filter((d, i, data) => i === data.length - 1)
-              .append('tspan')
-              .attr('font-weight', 'bold')
-              .text((d) => d.member)
-          )
-          .clone(true)
-          .lower()
-          .attr('class', 'text-cover')
-          .attr('fill', 'none')
-          .attr('stroke', 'white')
-          .attr('stroke-width', 6)
+        // const legendGroup = svg.append('g')
+        //   .attr('transform', `translate(${margin.left},0)`)
+        //   .attr('text-anchor', 'start')
+        //   .attr('font-family', 'sans-serif')
+        //   .attr('font-size', 10);
 
-        const legendGroup = svg
-          .append('g')
-          .attr('transform', 'translate(' + margin.left + ', 0)')
-          .attr('text-anchor', 'start')
-          .attr('font-family', 'sans-serif')
-          .attr('font-size', 10)
+        // const legend = legendGroup.selectAll('.legend')
+        //   .data(colorScale.domain())
+        //   .join('g')
+        //   .attr('transform', (d, i) => `translate(${i * 90},0)`);
 
-        const legend = legendGroup
-          .selectAll('.legend')
-          .data(data.members)
-          .join('g')
-          .attr('transform', (d, i) => 'translate(' + i * 90 + ', 0)')
+        // legend.append('rect')
+        //   .attr('width', 15)
+        //   .attr('height', 15)
+        //   .attr('fill', colorScale);
 
-        legend
-          .append('rect')
-          .attr('width', 19)
-          .attr('height', 19)
-          .attr('fill', colorScale)
-          .attr('fill-opacity', 0.8)
-
-        legend
-          .append('text')
-          .attr('x', 23)
-          .attr('y', 9.5)
-          .attr('dy', '0.35em')
-          .text((d) => d)
-
-        d3.select('.select-box').on('change', function (el, d) {
-          const selectedValue = d3.select('.select-box').property('value')
-
-          lineGroup
-            .select('.line-path')
-            .style('opacity', (d) =>
-              selectedValue === 'All' || selectedValue === d.member ? 1 : 0
-            )
-          lineGroup
-            .selectAll('text')
-            .attr('fill-opacity', (d) =>
-              selectedValue === 'All' || selectedValue === d.member ? 1 : 0
-            )
-          lineGroup
-            .selectAll('.text-cover')
-            .attr('stroke', (d) =>
-              selectedValue === 'All' || selectedValue === d.member
-                ? 'white'
-                : 'none'
-            )
-        })
+        // legend.append('text')
+        //   .attr('x', 23)
+        //   .attr('y', 9.5)
+        //   .attr('dy', '0.35em')
+        //   .text(d => d);
       }
 
       makeChart()

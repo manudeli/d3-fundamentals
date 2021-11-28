@@ -37,3 +37,30 @@ export async function getBoybandOwnSongData() {
     groups,
   }
 }
+
+export async function getSongByBtsMembersData() {
+  const memberMap = new Map()
+  const dateSet = new Set()
+  const series = []
+
+  const csv = await d3.csv('./data/BTS멤버년도별작곡작사횟수.csv')
+  csv.forEach(({ date, member, value }) => {
+    dateSet.add(new Date(date))
+    if (!memberMap.has(member)) {
+      memberMap.set(member, series.length)
+      series.push({ member, values: [] })
+    }
+    const d = series[memberMap.get(member)]
+    d.values.push({
+      member,
+      date: new Date(date),
+      value: parseInt(value),
+    })
+  })
+
+  return {
+    series,
+    dates: Array.from(dateSet),
+    members: Array.from(memberMap.keys()).sort(),
+  }
+}

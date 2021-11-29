@@ -14,6 +14,11 @@ export async function getBtsComposeRatioData() {
   })
 }
 
+export async function getBtsComposeWriteData() {
+  const csv = await d3.csv('./data/BTS년도별작곡작사횟수.csv')
+  return csv.map((d) => ({ ...d, date: new Date(d.date) }))
+}
+
 export async function getBoybandWriteRatioData() {
   const csv = await d3.csv('./data/남자아이돌작사비율.csv')
   return {
@@ -37,10 +42,7 @@ export async function getBoybandComposeRatioData() {
 export async function getBoybandOwnSongData() {
   const csv = await d3.csv('./data/남자아이돌년도별작곡작사횟수.csv')
   const data = csv
-    .map((d) => {
-      d.date = new Date(d.date)
-      return d
-    })
+    .map((d) => ({ ...d, date: new Date(d.date) }))
     .sort((a, b) => a.date - b.date)
   const groups = ['BTS', 'EXO', 'GOT7']
   const series = groups.map((key) =>

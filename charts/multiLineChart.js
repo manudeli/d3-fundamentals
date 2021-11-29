@@ -3,7 +3,7 @@ export function makeChart(chartId, dataObj, colorScheme) {
 
   const margin = { top: 20, right: 10, bottom: 10, left: 20 }
   const width = 540 - margin.left - margin.right
-  const height = 540 - margin.top - margin.bottom
+  const height = 324 - margin.top - margin.bottom
 
   const chartBox = d3.select(chartId)
   const svg = chartBox

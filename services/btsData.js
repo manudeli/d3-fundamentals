@@ -14,6 +14,26 @@ export async function getBtsComposeRatioData() {
   })
 }
 
+export async function getBoybandWriteRatioData() {
+  const csv = await d3.csv('./data/남자아이돌작사비율.csv')
+  return {
+    data: csv
+      .reduce((acc, cur) => [...acc, cur], [])
+      .sort((a, b) => b.참여 - a.참여),
+    columns: ['참여', '비참여'],
+  }
+}
+
+export async function getBoybandComposeRatioData() {
+  const csv = await d3.csv('./data/남자아이돌작곡비율.csv')
+  return {
+    data: csv
+      .reduce((acc, cur) => [...acc, cur], [])
+      .sort((a, b) => b.참여 - a.참여),
+    columns: ['참여', '비참여'],
+  }
+}
+
 export async function getBoybandOwnSongData() {
   const csv = await d3.csv('./data/남자아이돌년도별작곡작사횟수.csv')
   const data = csv

@@ -1,10 +1,13 @@
 import { makeChart as initArcChart } from './charts/bigPercentageArcChart.js'
 import { makeBoard as initTextBoard } from './charts/textBoard.js'
+import { makeChart as initStackedBarChart } from './charts/stackedBarChart.js'
 import { makeChart as initMultiLineChart } from './charts/multiLineChart.js'
 import { makeChart as initMultiLineWithInputChart } from './charts/multiLineWithInputChart.js'
 import {
   getBtsWriteRatioData,
   getBtsComposeRatioData,
+  getBoybandWriteRatioData,
+  getBoybandComposeRatioData,
   getBoybandOwnSongData,
   getSongByBtsMembersData,
 } from './services/btsData.js'
@@ -30,6 +33,19 @@ async function initCharts() {
 
   initTextBoard('#total-song-board', 226, colorScheme)
   initTextBoard('#total-album-board', 38, colorScheme)
+
+  const boybandWriteRatioData = await getBoybandWriteRatioData()
+  const boybandComposeRatioData = await getBoybandComposeRatioData()
+  initStackedBarChart(
+    '#boyband-write-bar-chart',
+    boybandWriteRatioData,
+    colorScheme
+  )
+  initStackedBarChart(
+    '#boyband-compose-bar-chart',
+    boybandComposeRatioData,
+    colorScheme
+  )
 
   const boybandOwnSongData = await getBoybandOwnSongData()
   initMultiLineChart(
